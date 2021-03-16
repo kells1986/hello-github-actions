@@ -11,7 +11,6 @@ jobs:
         with:
           MY_NAME: "Mona"
     name: Hello Python Action
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - uses: ./new-action
