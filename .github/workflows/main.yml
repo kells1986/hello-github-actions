@@ -10,8 +10,6 @@ jobs:
       - uses: ./action-a
         with:
           MY_NAME: "Mona"
-
-  build:
     name: Hello Python Action
     runs-on: ubuntu-latest
     steps:
