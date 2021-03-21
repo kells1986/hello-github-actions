@@ -1,5 +1,8 @@
 name: A workflow for testing some Python
-on: push
+on: 
+  push:
+    paths:
+      - 'new-action/**'
 
 jobs:
   build:
