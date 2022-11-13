@@ -39,22 +39,12 @@ jobs:
       - uses: actions/checkout@v3
 
       - id: build
-        run: |
-          if echo ${{ needs.Change-Detection.outputs.library }} | grep -c "true"
-          then
-            cat components/library/data.txt
-          else
-            echo "Skipping Library Tests"
-          fi
+        run: cat components/library/data.txt
+        if: ${{ needs.Change-Detection.outputs.library == 'true' }}
 
       - id: libsignal
-        run: |
-          if echo ${{ needs.Change-Detection.outputs.library }} | grep -c "true"
-          then
-            echo "success=true" >> $GITHUB_OUTPUT
-          else
-            echo "success==skipped" >> $GITHUB_OUTPUT
-          fi
+        run: echo "success=${{ needs.Change-Detection.outputs.library == 'true' }}" >> $GITHUB_OUTPUT
+        if: ${{ needs.Change-Detection.outputs.library == 'true' }}
 
 
   # Once the Library is tested it should be installed in the base image
