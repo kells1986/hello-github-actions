@@ -47,7 +47,7 @@ jobs:
   # Alternatively we could be changing dependencies / keys in the base image which we also want to trigger on
   Build-Test-Base:
     needs: Change-Detection
-    if: ${{ needs.Change-Detection.outputs.base == 'true' }} or ${{ steps.libsignal.outputs.success == 'true' }}
+    if: ${{ needs.Change-Detection.outputs.base == 'true' }} or ${{ Build-Test-Library.libsignal.outputs.success == 'true' }}
     outputs:
       success: ${{ steps.basesignal.outputs.success }} 
     runs-on: ubuntu-latest
