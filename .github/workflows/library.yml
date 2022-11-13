@@ -20,15 +20,36 @@ jobs:
         id: filter
         with:
           filters: |
+            base:
+              - 'components/base-images/**'
             library:
               - 'components/library/**'
             consumer:
               - 'components/consumer/**'
 
-
+  # Build and Test the Library is the first, most important change
   Build-Test-Library:
     needs: Change-Detection
     if: ${{ needs.Change-Detection.outputs.library == 'true' }}
+    outputs:
+      success: ${{ steps.libsignal.outputs.success }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - id: build
+        run: cat components/library/data.txt
+
+      - id: libsignal
+        run: echo "success=true" >> $GITHUB_OUTPUT
+
+  # Once the Library is tested it should be installed in the base image
+  # Alternatively we could be changing dependencies / keys in the base image which we also want to trigger on
+  Build-Test-Base:
+    needs: Change-Detection
+    if: ${{ needs.Change-Detection.outputs.base == 'true' }} or ${{ steps.libsignal.outputs.success == 'true' }}
+    outputs:
+      success: ${{ steps.basesignal.outputs.success }} 
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -36,9 +57,18 @@ jobs:
       - id: 'cat'
         run: cat components/library/data.txt
 
+      - id: 'basesignal'
+        run: echo "success=true" >> $GITHUB_OUTPUT 
+
+
+  # This should trigger in 3 ways:
+  # 1. Changes to the code
+  # 2. Changes to the library
+  # 3. Changes to the base image
+  # Changes 2 and 3 are covered by the signal from a successful base image build
   Build-Test-Consumer:
     needs: Change-Detection
-    if: ${{ needs.Change-Detection.outputs.consumer == 'true' }} or ${{ needs.Change-Detection.outputs.library == 'true' }}
+    if: ${{ needs.Change-Detection.outputs.consumer == 'true' }} or ${{ steps.basesignal.outputs.success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
