@@ -40,7 +40,7 @@ jobs:
 
       - id: build
         run: |
-          if echo ${{ needs.Change-Detection.outputs.library == 'true' }}
+          if echo ${{ needs.Change-Detection.outputs.library }} | grep -c "true"
           then
             cat components/library/data.txt
           else
@@ -49,7 +49,7 @@ jobs:
 
       - id: libsignal
         run: |
-          if echo ${{ needs.Change-Detection.outputs.library == 'true' }}
+          if echo ${{ needs.Change-Detection.outputs.library }} | grep -c "true"
           then
             echo "success=true" >> $GITHUB_OUTPUT
           else
@@ -72,7 +72,7 @@ jobs:
 
       - id: 'cat'
         run: |
-          if ${{ needs.Change-Detection.outputs.base == 'true' }} || ${{ needs.Build-Test-Library.libsignal.outputs.success == 'true' }}
+          if echo ${{ needs.Change-Detection.outputs.base }} | grep -c "true" || echo ${{ needs.Build-Test-Library.libsignal.outputs.success }} | grep -c true
           then
             cat components/library/data.txt
           else
@@ -80,7 +80,7 @@ jobs:
           fi
       - id: 'basesignal'
         run: |
-          if ${{ needs.Change-Detection.outputs.base == 'true' }} || ${{ needs.Build-Test-Library.libsignal.outputs.success == 'true' }}
+          if echo ${{ needs.Change-Detection.outputs.base }} | grep -c "true" || echo ${{ needs.Build-Test-Library.libsignal.outputs.success }} | grep -c true
           then
             echo "success=true" >> $GITHUB_OUTPUT 
           else
