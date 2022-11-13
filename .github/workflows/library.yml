@@ -28,6 +28,7 @@ jobs:
               - 'components/consumer/**'
 
   # Build and Test the Library is the first, most important change
+  # Downstream tasks should be blocked until this is done
   Build-Test-Library:
     needs: Change-Detection
     if: ${{ needs.Change-Detection.outputs.library == 'true' }}
@@ -38,10 +39,22 @@ jobs:
       - uses: actions/checkout@v3
 
       - id: build
-        run: cat components/library/data.txt
+        run: |
+          if echo ${{ needs.Change-Detection.outputs.library == 'true' }}
+          then
+            cat components/library/data.txt
+          else
+            echo "Skipping Library Tests"
+          fi
 
       - id: libsignal
-        run: echo "success=true" >> $GITHUB_OUTPUT
+        run: |
+          if echo ${{ needs.Change-Detection.outputs.library == 'true' }}
+          then
+            echo "success=true" >> $GITHUB_OUTPUT
+          else
+            echo "success==skipped" >> $GITHUB_OUTPUT
+          fi
 
 
   # Once the Library is tested it should be installed in the base image
@@ -58,10 +71,21 @@ jobs:
       - uses: actions/checkout@v3
 
       - id: 'cat'
-        run: cat components/library/data.txt
-
+        run: |
+          if ${{ needs.Change-Detection.outputs.base == 'true' }} || ${{ needs.Build-Test-Library.libsignal.outputs.success == 'true' }}
+          then
+            cat components/library/data.txt
+          else
+            echo "Skipping Base Build"
+          fi
       - id: 'basesignal'
-        run: echo "success=true" >> $GITHUB_OUTPUT 
+        run: |
+          if ${{ needs.Change-Detection.outputs.base == 'true' }} || ${{ needs.Build-Test-Library.libsignal.outputs.success == 'true' }}
+          then
+            echo "success=true" >> $GITHUB_OUTPUT 
+          else
+            echo "success=skipped" >> $GITHUB_OUTPUT 
+          fi
 
 
   # This should trigger in 3 ways:
