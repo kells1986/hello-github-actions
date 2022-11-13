@@ -43,11 +43,14 @@ jobs:
       - id: libsignal
         run: echo "success=true" >> $GITHUB_OUTPUT
 
+
   # Once the Library is tested it should be installed in the base image
   # Alternatively we could be changing dependencies / keys in the base image which we also want to trigger on
   Build-Test-Base:
-    needs: Change-Detection
-    if: ${{ needs.Change-Detection.outputs.base == 'true' }} or ${{ Build-Test-Library.libsignal.outputs.success == 'true' }}
+    needs: 
+      - Change-Detection
+      - Build-Test-Library
+    if: ${{ needs.Change-Detection.outputs.base == 'true' }} or ${{ needs.Build-Test-Library.libsignal.outputs.success == 'true' }}
     outputs:
       success: ${{ steps.basesignal.outputs.success }} 
     runs-on: ubuntu-latest
@@ -67,8 +70,10 @@ jobs:
   # 3. Changes to the base image
   # Changes 2 and 3 are covered by the signal from a successful base image build
   Build-Test-Consumer:
-    needs: Change-Detection
-    if: ${{ needs.Change-Detection.outputs.consumer == 'true' }} or ${{ steps.basesignal.outputs.success' }}
+    needs: 
+      - Change-Detection
+      - Build-Test-Base
+    if: ${{ needs.Change-Detection.outputs.consumer == 'true' }} or ${{ needs.Build-Test-Base.basesignal.outputs.success == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
