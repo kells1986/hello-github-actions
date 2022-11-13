@@ -19,7 +19,7 @@ jobs:
       - uses: dorny/paths-filter@v2
         id: filter
         with:
-          ref: ${{ github.head_ref }}
+          ref: ${{ github.head_ref || github.ref_name }}
           filters: |
             base:
               - 'components/base-images/**'
