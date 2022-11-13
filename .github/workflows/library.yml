@@ -15,8 +15,7 @@ jobs:
       library: ${{ steps.filter.outputs.library }}
       consumer: ${{ steps.filter.outputs.consumer }}
     steps:
-      # For pull requests it's not necessary to checkout the code
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: dorny/paths-filter@v2
         id: filter
         with:
@@ -66,8 +65,7 @@ jobs:
   Build-Test-Base:
     needs: 
       - Change-Detection
-      - Build-Test-Library
-    if: ${{ needs.Change-Detection.outputs.base == 'true' }} or ${{ needs.Build-Test-Library.libsignal.outputs.success == 'true' }}
+    if: ${{ needs.Change-Detection.outputs.base == 'true' }}
     outputs:
       success: ${{ steps.basesignal.outputs.success }} 
     runs-on: ubuntu-latest
@@ -76,16 +74,15 @@ jobs:
 
       - id: 'cat'
         run: |
-          if echo ${{ needs.Change-Detection.outputs.base }} | grep -c "true" || echo ${{ needs.Build-Test-Library.libsignal.outputs.success }} | grep -c true
-          then
+          BASECHANGE=${{ needs.Change-Detection.outputs.base }}
+          if [ $BASECHANGE="true" ]; then 
             cat components/library/data.txt
           else
             echo "Skipping Base Build"
           fi
       - id: 'basesignal'
         run: |
-          if echo ${{ needs.Change-Detection.outputs.base }} | grep -c "true" || echo ${{ needs.Build-Test-Library.libsignal.outputs.success }} | grep -c true
-          then
+          if [ $BASECHANGE="true" ]; then 
             echo "success=true" >> $GITHUB_OUTPUT 
           else
             echo "success=skipped" >> $GITHUB_OUTPUT 
@@ -100,8 +97,7 @@ jobs:
   Build-Test-Consumer:
     needs: 
       - Change-Detection
-      - Build-Test-Base
-    if: ${{ needs.Change-Detection.outputs.consumer == 'true' }} or ${{ needs.Build-Test-Base.basesignal.outputs.success == 'true' }}
+    if: ${{ needs.Change-Detection.outputs.consumer == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
