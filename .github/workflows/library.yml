@@ -24,8 +24,9 @@ jobs:
               - 'components/library/**'
             consumer:
               - 'components/consumer/**'
-            
-Build-Test-Library:
+
+
+  Build-Test-Library:
     needs: Change-Detection
     if: ${{ needs.Change-Detection.outputs.library == 'true' }}
     runs-on: ubuntu-latest
@@ -35,7 +36,7 @@ Build-Test-Library:
       - id: 'cat'
         run: cat components/library/data.txt
 
-Build-Test-Consumer:
+  Build-Test-Consumer:
     needs: Change-Detection
     if: ${{ needs.Change-Detection.outputs.consumer == 'true' }}
     runs-on: ubuntu-latest
