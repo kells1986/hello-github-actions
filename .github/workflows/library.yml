@@ -33,7 +33,8 @@ jobs:
   # Downstream tasks should be blocked until this is done
   Build-Test-Library:
     needs: Change-Detection
-    if: ${{ needs.Change-Detection.outputs.library == 'true' }}
+    # No need for an if here. This always has to trigger, but will skip heavy lifting if no change has occurred
+    # Then we can skip to the base image and check if that needs updating
     outputs:
       success: ${{ steps.build.outputs.success }}
     runs-on: ubuntu-latest
