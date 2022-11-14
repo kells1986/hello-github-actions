@@ -54,6 +54,7 @@ jobs:
       - id: libsignal
         name: Lib Signal
         run: |
+          LIBCHANGE=${{ needs.Change-Detection.outputs.library }}
           if echo ${{ needs.Change-Detection.outputs.library }} | grep -c "true"
           then
             echo "success=true" >> $GITHUB_OUTPUT
@@ -67,27 +68,25 @@ jobs:
   Build-Test-Base:
     needs: 
       - Change-Detection
-    if: ${{ needs.Change-Detection.outputs.base == 'true' }}
+      - Build-Test-Library
+    if: ${{ needs.Change-Detection.outputs.base == 'true' }} or ${{ needs.Build-Test-Library.outputs.success == 'true' }} or ${{ needs.Build-Test-Library.outputs.success == 'skipped' }} 
     outputs:
       success: ${{ steps.basesignal.outputs.success }} 
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
-      - id: 'cat'
+      - id: 'build-base'
+      - name: Build-Base
         run: |
           BASECHANGE=${{ needs.Change-Detection.outputs.base }}
-          if [ $BASECHANGE="true" ]; then 
+          LIBCHANGE=${{ needs.Build-Test-Base.outputs.success }}
+          if [[ "$BASECHANGE" == "true" ]] || [[ "$LIBCHANGE" == "true" ]]; then 
             cat components/library/data.txt
+            echo "success=true" >> $GITHUB_OUTPUT
           else
             echo "Skipping Base Build"
-          fi
-      - id: 'basesignal'
-        run: |
-          if [ $BASECHANGE="true" ]; then 
-            echo "success=true" >> $GITHUB_OUTPUT 
-          else
-            echo "success=skipped" >> $GITHUB_OUTPUT 
+            echo "success=skipped" >> $GITHUB_OUTPUT
           fi
 
 
@@ -99,7 +98,8 @@ jobs:
   Build-Test-Consumer:
     needs: 
       - Change-Detection
-    if: ${{ needs.Change-Detection.outputs.consumer == 'true' }}
+      - Build-Test-Base
+    if: ${{ needs.Change-Detection.outputs.consumer == 'true' }} or ${{ needs.Build-Test-Base.outputs.success == 'true' }} 
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
