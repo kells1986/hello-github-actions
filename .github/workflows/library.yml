@@ -72,7 +72,7 @@ jobs:
         name: Build-Base
         run: |
           BASECHANGE=${{ needs.Change-Detection.outputs.base }}
-          LIBCHANGE=${{ needs.Build-Test-Base.outputs.success }}
+          LIBCHANGE=${{ needs.Build-Test-Library.outputs.success }}
           if [[ "$BASECHANGE" == "true" ]] || [[ "$LIBCHANGE" == "true" ]]; then 
             cat components/library/data.txt
             echo "success=true" >> $GITHUB_OUTPUT
