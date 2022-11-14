@@ -35,7 +35,7 @@ jobs:
     needs: Change-Detection
     if: ${{ needs.Change-Detection.outputs.library == 'true' }}
     outputs:
-      success: ${{ steps.libsignal.outputs.success }}
+      success: ${{ steps.build.outputs.success }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -50,7 +50,7 @@ jobs:
             echo "success=true" >> $GITHUB_OUTPUT
           else
             echo "Skipping Library Tests"
-            echo "success==skipped" >> $GITHUB_OUTPUT
+            echo "success=skipped" >> $GITHUB_OUTPUT
           fi
 
 
@@ -63,7 +63,7 @@ jobs:
       - Build-Test-Library
     if: ${{ needs.Change-Detection.outputs.base == 'true' }} or ${{ needs.Build-Test-Library.outputs.success == 'true' }} or ${{ needs.Build-Test-Library.outputs.success == 'skipped' }} 
     outputs:
-      success: ${{ steps.basesignal.outputs.success }} 
+      success: ${{ steps.build-base.outputs.success }} 
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -97,5 +97,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - id: 'cat'
-        run: cat components/consumer/data.txt
+        run: |
+          echo ${{ needs.Build-Test-Base.outputs.success }}
+          cat components/consumer/data.txt
     
